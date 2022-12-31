@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useMemo } from 'react';
 import { AuthContext } from '../libs/AuthContext';
 
 import {initializeApp} from "firebase/app";
@@ -6,20 +6,10 @@ import {getAuth,getRedirectResult,GoogleAuthProvider, onAuthStateChanged, signIn
 import { firebaseConfig } from '../libs/firebase_constants';
 export function Header(){
   const authContext=useContext(AuthContext);
-  const auth=getAuth(initializeApp(firebaseConfig));
+  const auth=useMemo(()=>getAuth(initializeApp(firebaseConfig)),[]);
 
   useEffect(()=>{
-
-    onAuthStateChanged(auth,(user)=>{
-      if(user){
-        authContext.setUser({
-          displayName:user.displayName??"NO NAME",
-          uid:user.uid,
-        });
-      }
-    });
-
-
+    
     // const redirectResult=getRedirectResult(auth);
 
     // redirectResult.then((userCredential:UserCredential|null)=>{
@@ -42,9 +32,9 @@ export function Header(){
 
 
     return ()=>{
-
+      console.log("unmount");
     };
-  });
+  },[]);
   
 
   const onSignIn=(e:React.MouseEvent)=>{
