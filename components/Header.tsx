@@ -1,36 +1,10 @@
-import { useContext, useEffect, useMemo } from 'react';
-import { AuthContext } from '../libs/AuthContext';
+import { AuthButton } from '../components/AuthButton'
 
-import {initializeApp} from "firebase/app";
-import {getAuth,getRedirectResult,GoogleAuthProvider, onAuthStateChanged, signInWithRedirect, signOut, UserCredential} from "firebase/auth";
-import { firebaseConfig } from '../libs/firebase_constants';
+
 export function Header(){
-  const authContext=useContext(AuthContext);
-  const auth=useMemo(()=>getAuth(initializeApp(firebaseConfig)),[]);
-  
-  const onSignIn=(e:React.MouseEvent)=>{
-    e.preventDefault();
-    const googleAuthProvider=new GoogleAuthProvider();
-    googleAuthProvider.addScope("profile");
-    signInWithRedirect(auth,googleAuthProvider);
-
-  };
-  const onSignOut=(e:React.MouseEvent)=>{
-    e.preventDefault();
-    signOut(auth).then(()=>{
-      authContext.setUser(undefined);
-    }).catch((error)=>{
-      console.error(error);
-    });
-  };
-
-  return <div>
-    {
-      (authContext.user===undefined)?
-      (<div>Loading...</div>):
-      authContext.user!==false?
-        (<div><a onClick={onSignOut}>サインアウト</a> {authContext.user.displayName}</div>):
-        (<div><a onClick={onSignIn}>サインイン</a></div>)
-    }
-  </div>
+  return (
+    <div>
+      <AuthButton/>
+    </div>
+  );
 }
