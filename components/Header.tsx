@@ -7,36 +7,7 @@ import { firebaseConfig } from '../libs/firebase_constants';
 export function Header(){
   const authContext=useContext(AuthContext);
   const auth=useMemo(()=>getAuth(initializeApp(firebaseConfig)),[]);
-
-  useEffect(()=>{
-    
-    // const redirectResult=getRedirectResult(auth);
-
-    // redirectResult.then((userCredential:UserCredential|null)=>{
-    //   if(!userCredential){
-    //     throw new Error("userCredential is null");
-    //   }
-    //   const oAuthCredential=GoogleAuthProvider.credentialFromResult(userCredential);
-    //   if(!oAuthCredential){
-    //     throw new Error("oAuthCredential is null");
-    //   }
-    //   const {user}=userCredential;
-    //   authContext.setUser({
-    //     displayName:user.displayName??"NO NAME",
-    //     uid:user.uid,
-    //   })
-
-    // }).catch((error)=>{
-    //   console.error(error);
-    // });
-
-
-    return ()=>{
-      console.log("unmount");
-    };
-  },[]);
   
-
   const onSignIn=(e:React.MouseEvent)=>{
     e.preventDefault();
     const googleAuthProvider=new GoogleAuthProvider();
@@ -54,6 +25,12 @@ export function Header(){
   };
 
   return <div>
-    {authContext.user?<div><a onClick={onSignOut}>サインアウト</a> {authContext.user.displayName}</div>:<div><a onClick={onSignIn}>サインイン</a></div>}
+    {
+      (authContext.user===undefined)?
+      (<div>Loading...</div>):
+      authContext.user!==false?
+        (<div><a onClick={onSignOut}>サインアウト</a> {authContext.user.displayName}</div>):
+        (<div><a onClick={onSignIn}>サインイン</a></div>)
+    }
   </div>
 }

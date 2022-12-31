@@ -7,7 +7,7 @@ import { User } from '../libs/User';
 
 
 export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children })=>{
-  const [user,setUser]=useState<User>();
+  const [user,setUser]=useState<User|false|undefined>();
   // useEffect(()=>{
   //   // setAuthContextValue({
   //   //   user:{
@@ -33,6 +33,8 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
             uid:newUser.uid,
           });
         }
+      }else{
+        setUser(false);
       }
     });
     return unscribe;
