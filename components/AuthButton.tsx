@@ -17,8 +17,9 @@ export function AuthButton(){
   };
   const onSignOut=(e:React.MouseEvent)=>{
     e.preventDefault();
+    authContext.setUser(undefined);
     signOut(auth).then(()=>{
-      authContext.setUser(undefined);
+      // DO NOTHING
     }).catch((error)=>{
       console.error(error);
     });
