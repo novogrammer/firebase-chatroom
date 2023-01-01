@@ -17,8 +17,8 @@ export default function Home() {
   const [rooms,setRooms]=useState(new Map<string,Room>());
   const roomIdForCreate=useRef<HTMLInputElement>(null);
   const app=useMemo(()=>initializeApp(firebaseConfig),[]);
-  const auth=useMemo(()=>getAuth(app),[]);
-  const db=useMemo(()=>getFirestore(app),[]);
+  const auth=useMemo(()=>getAuth(app),[app]);
+  const db=useMemo(()=>getFirestore(app),[app]);
 
   const onClickCreate=(async (event:React.MouseEvent)=>{
     event.preventDefault();
