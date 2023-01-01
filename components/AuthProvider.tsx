@@ -1,5 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { doc, getFirestore, setDoc } from 'firebase/firestore';
 import { useEffect, useMemo, useState } from 'react';
 import { AuthContext } from '../libs/AuthContext';
 import { firebaseConfig } from '../libs/firebase_constants';
@@ -20,7 +21,10 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
   //   };
   // },[authContextValue]);
 
-  const auth=useMemo(()=>getAuth(initializeApp(firebaseConfig)),[]);
+  const app=useMemo(()=>initializeApp(firebaseConfig),[]);
+  const auth=useMemo(()=>getAuth(app),[app]);
+  const db=useMemo(()=>getFirestore(app),[app]);
+
 
   useEffect(()=>{
     const unscribe=onAuthStateChanged(auth,(newUser)=>{
@@ -28,10 +32,19 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
       if(newUser){
         if(!user || user.uid != newUser.uid)
         {
-          setUser({
+          const userValue={
             displayName:newUser.displayName??"NO NAME",
             uid:newUser.uid,
+          };
+          setUser(userValue);
+
+          setDoc(doc(db,"users",newUser.uid),userValue)
+          .catch((error)=>{
+            // TODO: エラー表示
+            console.error(error);
           });
+      
+
         }
       }else{
         setUser(false);
