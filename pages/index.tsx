@@ -20,20 +20,31 @@ export default function Home() {
   const auth=useMemo(()=>getAuth(app),[]);
   const db=useMemo(()=>getFirestore(app),[]);
 
-  const onClickCreate=((event:React.MouseEvent)=>{
+  const onClickCreate=(async (event:React.MouseEvent)=>{
     event.preventDefault();
     if(!roomIdForCreate.current){
       throw new Error("roomIdForCreate.current is null");
     }
     const roomId=roomIdForCreate.current.value;
-    setDoc(doc(db,"rooms",roomId),{
-      // population:0,
-    });
+    try{
+      await setDoc(doc(db,"rooms",roomId),{
+        // population:0,
+      });
+  
+    }catch(error){
+      // TODO: エラー表示
+      console.error(error);
+    }
 
   });
-  const onClickDelete=((roomId:string,event:React.MouseEvent)=>{
+  const onClickDelete=(async (roomId:string,event:React.MouseEvent)=>{
     event.preventDefault();
-    deleteDoc(doc(db,"rooms",roomId));
+    try{
+      await deleteDoc(doc(db,"rooms",roomId));
+    }catch(error){
+      // TODO: エラー表示
+      console.error(error);
+    }
     // TODO: サブコレクションも削除する
   });
 
