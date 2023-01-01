@@ -1,9 +1,62 @@
 import Head from 'next/head'
 import Image from 'next/image'
+import Link from "next/link"
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Room } from '../libs/Room';
 import styles from '../styles/Home.module.scss'
+
+import {doc,getFirestore,setDoc,collection, onSnapshot, deleteDoc} from "firebase/firestore";
+import { getAuth } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../libs/firebase_constants';
+
 
 
 export default function Home() {
+
+  const [rooms,setRooms]=useState(new Map<string,Room>());
+  const roomIdForCreate=useRef<HTMLInputElement>(null);
+  const app=useMemo(()=>initializeApp(firebaseConfig),[]);
+  const auth=useMemo(()=>getAuth(app),[]);
+  const db=useMemo(()=>getFirestore(app),[]);
+
+  const onClickCreate=((event:React.MouseEvent)=>{
+    event.preventDefault();
+    if(!roomIdForCreate.current){
+      throw new Error("roomIdForCreate.current is null");
+    }
+    const roomId=roomIdForCreate.current.value;
+    setDoc(doc(db,"rooms",roomId),{
+      // population:0,
+    });
+
+  });
+  const onClickDelete=((roomId:string,event:React.MouseEvent)=>{
+    event.preventDefault();
+    deleteDoc(doc(db,"rooms",roomId));
+    // TODO: サブコレクションも削除する
+  });
+
+  useEffect(()=>{
+    const collectionRefRoom=collection(db,"rooms");
+    const unsubscribe=onSnapshot(collectionRefRoom,(querySnapshot)=>{
+      console.log("onSnapshot",querySnapshot.size);
+      
+      const newRooms=new Map<string,Room>();
+
+      querySnapshot.forEach((doc)=>{
+        const id=doc.id;
+        const data=doc.data() as Room;
+        console.log(id,data);
+        newRooms.set(id,data);
+      });
+      setRooms(newRooms);
+    });
+
+    return unsubscribe;
+  },[]);
+
+
   return (
     <>
       <Head>
@@ -13,7 +66,16 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
-        this is home.
+        <div>
+          <input type="text" ref={roomIdForCreate}/><button onClick={onClickCreate}>Room作成</button>
+        </div>
+        <div>
+          {
+            Array.from(rooms.entries()).map(([roomId,room])=>{
+              return <div key={roomId}>{roomId}&nbsp;<Link href={"/room?roomId="+roomId}>go</Link>&nbsp;<a onClick={onClickDelete.bind(null,roomId)}>delete</a></div>
+            })
+          }
+        </div>
       </main>
     </>
   )

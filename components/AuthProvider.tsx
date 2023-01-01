@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useEffect, useMemo, useState } from 'react';
-import { AuthContext, AuthContextValue } from '../libs/AuthContext';
+import { AuthContext } from '../libs/AuthContext';
 import { firebaseConfig } from '../libs/firebase_constants';
 import { User } from '../libs/User';
 
@@ -38,7 +38,7 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
       }
     });
     return unscribe;
-  },[auth,user]);
+  },[]);
 
   return (
     <AuthContext.Provider value={{user,setUser}}>
