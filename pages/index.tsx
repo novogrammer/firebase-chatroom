@@ -6,19 +6,18 @@ import { Room } from '../libs/Room';
 import styles from '../styles/Home.module.scss'
 
 import {doc,getFirestore,setDoc,collection, onSnapshot, deleteDoc} from "firebase/firestore";
-import { getAuth } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../libs/firebase_constants';
 
 
 
-export default function Home() {
+export default function HomePage() {
 
   const [rooms,setRooms]=useState(new Map<string,Room>());
   const roomIdForCreate=useRef<HTMLInputElement>(null);
   const app=useMemo(()=>initializeApp(firebaseConfig),[]);
-  const auth=useMemo(()=>getAuth(app),[app]);
   const db=useMemo(()=>getFirestore(app),[app]);
+  const [errorMessage,setErrorMessage]=useState<string|null>(null);
 
   const onClickCreate=(async (event:React.MouseEvent)=>{
     event.preventDefault();
@@ -27,23 +26,34 @@ export default function Home() {
     }
     const roomId=roomIdForCreate.current.value;
     try{
+      setErrorMessage(null);
       await setDoc(doc(db,"rooms",roomId),{
+        roomId:roomId,
         // population:0,
       });
   
     }catch(error){
-      // TODO: エラー表示
       console.error(error);
+      if(error instanceof Error){
+        setErrorMessage(error.message);
+      }else{
+        setErrorMessage("エラーが発生しました。");
+      }  
     }
 
   });
   const onClickDelete=(async (roomId:string,event:React.MouseEvent)=>{
     event.preventDefault();
     try{
+      setErrorMessage(null);
       await deleteDoc(doc(db,"rooms",roomId));
     }catch(error){
-      // TODO: エラー表示
       console.error(error);
+      if(error instanceof Error){
+        setErrorMessage(error.message);
+      }else{
+        setErrorMessage("エラーが発生しました。");
+      }  
     }
     // TODO: サブコレクションも削除する
   });
@@ -51,7 +61,7 @@ export default function Home() {
   useEffect(()=>{
     const collectionRefRoom=collection(db,"rooms");
     const unsubscribe=onSnapshot(collectionRefRoom,(querySnapshot)=>{
-      console.log("onSnapshot",querySnapshot.size);
+      // console.log("onSnapshot",querySnapshot.size);
       
       const newRooms=new Map<string,Room>();
 
@@ -77,6 +87,11 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <main className={styles.main}>
+        <h1 className={styles.title}>firebase-chatroom</h1>
+        <h1 className={styles.lobby}>ロビー</h1>
+        {
+          errorMessage && <div className={styles.error}>{errorMessage}</div>
+        }
         <div>
           <input type="text" ref={roomIdForCreate}/><button onClick={onClickCreate}>Room作成</button>
         </div>

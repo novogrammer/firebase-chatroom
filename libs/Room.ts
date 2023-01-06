@@ -1,15 +1,9 @@
-export interface Member{
-  uid:string;
-  displayName:string;
-}
-export interface Message{
-  uid:string;
-  displayName:string;
-  text:string;
-}
+import { Message } from "./Message";
+import { User } from "./User";
 
 export interface Room{
-  members:Map<string,Member>;
-  messages:Map<string,Message>;
+  roomId:string;
   population:number;
+  members:Map<string,User>;
+  messages:Map<string,Message>;
 }

@@ -9,17 +9,6 @@ import { User } from '../libs/User';
 
 export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children })=>{
   const [user,setUser]=useState<User|false|undefined>();
-  // useEffect(()=>{
-  //   // setAuthContextValue({
-  //   //   user:{
-  //   //     displayName:"ディスプレイネーム",
-  //   //     uid:"1234",
-  //   //   }
-  //   // });
-  //   return ()=>{
-
-  //   };
-  // },[authContextValue]);
 
   const app=useMemo(()=>initializeApp(firebaseConfig),[]);
   const auth=useMemo(()=>getAuth(app),[app]);
@@ -30,8 +19,7 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
     const unscribe=onAuthStateChanged(auth,(newUser)=>{
       console.log("onAuthStateChanged",newUser,user);
       if(newUser){
-        if(!user || user.uid != newUser.uid)
-        {
+        if(!user || user.uid != newUser.uid){
           const userValue={
             displayName:newUser.displayName??"NO NAME",
             uid:newUser.uid,
@@ -40,7 +28,6 @@ export const AuthProvider:React.FC<{children?:React.ReactNode[]}> = ({ children 
 
           setDoc(doc(db,"users",newUser.uid),userValue)
           .catch((error)=>{
-            // TODO: エラー表示
             console.error(error);
           });
       
