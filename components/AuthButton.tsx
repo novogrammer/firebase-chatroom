@@ -29,7 +29,7 @@ export function AuthButton(){
     {
       (authContext.user===undefined)?
       (<div>Loading...</div>):
-      authContext.user!==false?
+      authContext.user?
         (<div><a onClick={onSignOut}>サインアウト</a> {authContext.user.displayName}</div>):
         (<div><a onClick={onSignIn}>サインイン</a></div>)
     }
