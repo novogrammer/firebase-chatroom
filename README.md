@@ -34,28 +34,37 @@ TODO:今のままでは、ログインさえしていれば誰でも消せる。
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    function isRoomExists(roomId){
+    	return exists(/databases/$(database)/documents/rooms/$(roomId));
+    }
+  
     match /{document=**} {
       allow read: if false;
       allow write: if false;
     }
     match /users/{userId}{
       allow read: if true;
-    	allow write: if request.auth != null && request.auth.uid == userId;
+    	allow write: if isAuthenticated() && request.auth.uid == userId;
     }
     match /rooms/{roomId} {
       allow read: if true;
-      allow create: if request.auth != null;
+      allow create: if isAuthenticated();
       allow update: if false;
-      allow delete:if request.auth != null;
+      allow delete:if isAuthenticated();
       match /members/{memberId}{
-        allow read: if true;
-        allow write: if request.auth != null;
+        allow read: if isRoomExists(roomId);
+        allow create: if isAuthenticated() && isRoomExists(roomId);
+        allow update: if isRoomExists(roomId);
+        allow delete:if isAuthenticated();
       }
       match /messages/{messageId}{
-        allow read: if true;
-        allow create: if request.auth != null;
+        allow read: if isRoomExists(roomId);
+        allow create: if isAuthenticated() && isRoomExists(roomId);
         allow update: if false;
-        allow delete:if request.auth != null;
+        allow delete:if isAuthenticated();
       }
     }
   }
