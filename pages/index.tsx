@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Room } from '../libs/Room';
 import styles from '../styles/Home.module.scss'
 
-import {doc,getFirestore,setDoc,collection, onSnapshot, deleteDoc} from "firebase/firestore";
+import {doc,getFirestore,setDoc,collection, onSnapshot, deleteDoc, runTransaction, Transaction, query, getDocs, DocumentReference} from "firebase/firestore";
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../libs/firebase_constants';
 
@@ -46,8 +46,39 @@ export default function HomePage() {
     event.preventDefault();
     try{
       setErrorMessage(null);
-      // TODO: サブコレクションも削除する必要があるが、Web clientでは推奨されていない。メンテナンス用のスクリプトを実行する必要がある。
-      await deleteDoc(doc(db,"rooms",roomId));
+      // await deleteDoc(doc(db,"rooms",roomId));
+      // サブコレクションの削除は、Web clientでは推奨されていない。
+      // 本来はメンテナンス用のスクリプトを実行する必要がある。
+      const roomRef=doc(db,"rooms",roomId);
+      const memberDocRefList:DocumentReference[]=[];
+      {
+        const queryMembers = query(collection(db, "rooms",roomId,"members"));
+        const queryMembersSnapshot = await getDocs(queryMembers);
+        queryMembersSnapshot.forEach((d) => {
+          const memberDocRef=doc(db,"rooms",roomId,"members",d.id);
+          memberDocRefList.push(memberDocRef);
+        });
+      }
+      const messageDocRefList:DocumentReference[]=[];
+      {
+        const queryMessages = query(collection(db, "rooms",roomId,"messages"));
+        const queryMessagesSnapshot = await getDocs(queryMessages);
+        queryMessagesSnapshot.forEach((d) => {
+          const messageDocRef=doc(db,"rooms",roomId,"messages",d.id);
+          messageDocRefList.push(messageDocRef);
+        });
+
+      }
+
+      await runTransaction(db,async (transaction:Transaction)=>{
+        for(let memberDocRef of memberDocRefList){
+          await transaction.delete(memberDocRef);
+        }
+        for(let messageDocRef of messageDocRefList){
+          await transaction.delete(messageDocRef);
+        }
+        await transaction.delete(roomRef);
+      })
     }catch(error){
       console.error(error);
       if(error instanceof Error){

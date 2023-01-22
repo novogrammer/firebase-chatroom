@@ -3,6 +3,11 @@ Firestoreでサーバレスなチャットサービスを実現する
 
 demo https://novogrammer.github.io/firebase-chatroom/
 
+
+サブコレクションの削除は、Web clientでは推奨されていない。
+
+本来はメンテナンス用のスクリプトを実行する必要がある。
+
 ## Firebase側の準備
 + Firebaseプロジェクトを作る
 + アプリを追加する（Web App）
