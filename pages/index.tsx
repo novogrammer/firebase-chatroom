@@ -46,6 +46,7 @@ export default function HomePage() {
     event.preventDefault();
     try{
       setErrorMessage(null);
+      // TODO: サブコレクションも削除する必要があるが、Web clientでは推奨されていない。メンテナンス用のスクリプトを実行する必要がある。
       await deleteDoc(doc(db,"rooms",roomId));
     }catch(error){
       console.error(error);
@@ -55,7 +56,6 @@ export default function HomePage() {
         setErrorMessage("エラーが発生しました。");
       }  
     }
-    // TODO: サブコレクションも削除する
   });
 
   useEffect(()=>{
